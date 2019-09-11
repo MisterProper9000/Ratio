@@ -2,6 +2,7 @@
 #define IRATIO_H
 
 #include "error.h"
+#define ABS(x) ((x) > 0 ? (x) : -(x))
 //#include "SHARED_EXPORT.h"
 
 class /*SHARED_EXPORT*/ IRatio

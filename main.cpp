@@ -2,6 +2,9 @@
 #include "IRatio.h"
 #include "ILog.h"
 #include <iostream>
+
+
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a1(argc, argv);
@@ -42,7 +45,15 @@ int main(int argc, char *argv[])
     r2->divide(r3);
     r2->get(a,b);
     std::cout << a << " " << b << std::endl;
-
+    std::cout << "_______________" << std::endl;
+    std::cout << check(INT_MAX, -1) << std::endl;
+    std::cout << check(INT_MAX, 1) << std::endl;
+    std::cout << check(-1, -1) << std::endl;
+    std::cout << check(1, 2) << std::endl;
+    std::cout << check(INT_MAX, INT_MAX) << std::endl;
+    std::cout << check(INT_MIN, INT_MAX) << std::endl;
+    std::cout << check(INT_MAX, -INT_MAX) << std::endl;
+    std::cout << check(INT_MIN, -INT_MIN) << std::endl;
     ILog::destroy();
     return a1.exec();
 }

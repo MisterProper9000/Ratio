@@ -39,6 +39,9 @@ namespace{
         void operator=(const IRatioImpl& other) = delete;
 
         int gcd (int a, int b);
+        bool checkaddsub(int a, int b);
+        bool checkmul(int a, int b);
+        bool checkdiv(int a, int b);
 
     };
 }
@@ -51,6 +54,50 @@ int IRatioImpl::gcd (int a, int b) {
             a = a - b;
     }
     return a;
+}
+
+bool IRatioImpl::checkaddsub(int a, int b)
+{
+    if(a < 0 && b < 0)
+    {
+        a = -a;
+        b = -b;
+    }
+    if(b>0)
+        return a <= INT_MAX - b || b <= INT_MAX - a;
+    else
+        return a <= INT_MIN - b || b <= INT_MIN - a;
+}
+
+bool IRatioImpl::checkmul(int a, int b)
+{
+    if (a > 0) {  /* a is positive */
+        if (b > 0) {  /* a and b are positive */
+            if (a > (INT_MAX / b)) {
+                return false;
+            }
+        } else { /* a positive, b nonpositive */
+            if (b < (INT_MIN / a)) {
+                return false;
+            }
+        } /* a positive, b nonpositive */
+   } else { /* a is nonpositive */
+        if (b > 0) { /* a is nonpositive, b is positive */
+            if (a < (INT_MIN / b)) {
+                return false;
+            }
+        } else { /* a and b are nonpositive */
+            if ( (a != 0) && (b < (INT_MAX / a))) {
+                 return false;
+            }
+        } /* End if a and b are nonpositive */
+    } /* End if a is nonpositive */
+    return true;
+}
+
+bool IRatioImpl::checkdiv(int a, int b)
+{
+    return ((b == 0) || ((a == INT_MIN) && (b == -1)));
 }
 
 IRatio* IRatio::createRatio(int nom, int denom)
@@ -117,10 +164,10 @@ int IRatioImpl::add(const IRatio *const right)
         return ERR_OK;
 
     // Checking if addition will cause overflow
-    if((double)m_nominator <= (double)INT_MAX/denom &&
-            (double)m_denominator <= (double)INT_MAX/nom &&
-            m_nominator*denom <= INT_MAX - m_denominator*nom &&
-            (double)m_denominator <= INT_MAX/denom)
+    if(checkmul(m_nominator, denom) &&
+            checkmul(m_denominator, nom) &&
+            checkaddsub(m_nominator*denom, m_denominator*nom) &&
+            checkmul(m_denominator, denom))
     {
         m_nominator = m_nominator*denom + m_denominator*nom;
         m_denominator *= denom;
@@ -159,10 +206,10 @@ int IRatioImpl::subtract(const IRatio *const right)
         return ERR_OK;
 
     // Checking if subtraction will cause overflow
-    if((double)m_nominator <= (double)INT_MAX/denom &&
-            (double)m_denominator <= (double)INT_MAX/nom &&
-            m_nominator*denom >= INT_MIN + m_denominator*nom &&
-            (double)m_denominator <= INT_MAX/denom)
+    if(checkmul(m_nominator, denom) &&
+            checkmul(m_denominator, nom) &&
+            checkaddsub(m_nominator*denom, -m_denominator*nom) &&
+            checkmul(m_denominator, denom))
     {
         m_nominator = m_nominator*denom - m_denominator*nom;
         m_denominator *= denom;
@@ -203,9 +250,8 @@ int IRatioImpl::multiply(const IRatio *const right)
         return ERR_OK;
     }
 
-    // Checking if subtraction will cause overflow
-    if((double)m_nominator <= (double)INT_MAX/nom &&
-            (double)m_denominator <= (double)INT_MAX/denom)
+    if(checkmul(m_nominator, nom)&&
+            checkmul(m_denominator, denom))
     {
         m_nominator *= nom;
         m_denominator *= denom;
@@ -249,9 +295,8 @@ int IRatioImpl::divide(const IRatio *const right)
     if(m_nominator == 0)
         return ERR_OK;
 
-    // Checking if subtraction will cause overflow
-    if((double)m_nominator <= (double)INT_MAX/denom &&
-            (double)m_denominator <= (double)INT_MAX/nom)
+    if(checkmul(m_denominator, nom) &&
+           checkmul(m_nominator, denom))
     {
         m_nominator *= denom;
         m_denominator *= nom;
